@@ -615,11 +615,7 @@ class Database:
                 print("Exiting...")
                 break
             else:
-                print("Invalid choice")
-
-        
-        
-        
+                print("Invalid choice")       
         
         
     def admin_menu(self):
@@ -706,10 +702,7 @@ class Database:
             else:
                 print("Invalid choice")
 
-
-
-        
-        
+     
 def main():
     a=Database("PMS")
     a.mainmenu()
