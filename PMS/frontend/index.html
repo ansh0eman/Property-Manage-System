@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Property Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="header">
+    <h1>Property Management System</h1>
+    <div id="user-info" class="user-info">
+      <span id="username"></span> | <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+  
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search...">
+    <button onclick="searchProperties()">Search</button>
+  </div>
+
+  <div id="property-list" class="property-list">
+    <!-- Properties will be displayed here -->
+  </div>
+
+  <div id="login-form" class="login-form">
+    <input type="text" id="login-username" placeholder="Username">
+    <input type="password" id="login-password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="booking-form" class="booking-form">
+    <h2>Book Property</h2>
+    <input type="text" id="booking-name" placeholder="Name">
+    <input type="text" id="booking-address" placeholder="Address">
+    <input type="text" id="booking-price" placeholder="Price">
+    <button onclick="bookProperty()">Book Now</button>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
