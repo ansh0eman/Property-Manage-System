@@ -1,14 +1,13 @@
 import sqlite3
-from rich.console import Console
-from rich.prompt import Prompt
 
-console = Console()
 
 class Database:
     def __init__(self,db_file):
         self.db_file=db_file
         self.conn=sqlite3.connect(self.db_file)
         self.cur=self.conn.cursor()
+        self.logged_in = False
+        
     
     def create_landowner(self):
         self.cur.execute('''CREATE TABLE if not exists Landowner  (
@@ -21,11 +20,11 @@ class Database:
         self.conn.commit()
         
     def insert_into_landowner(self):
-        id=Prompt.ask("Enter landowner id: ")
-        fname=Prompt.ask("Enter first name: ")
-        lname=Prompt.ask("Enter last name: ")
-        email=Prompt.ask("Enter email: ")
-        pno=Prompt.ask("Enter phone number")
+        id=input('enter landowner id: ')
+        fname=input('enter first name: ')
+        lname=input('enter last name: ')
+        email=input('enter email: ')
+        pno=input('enter phone number')
         self.cur.execute('''INSERT INTO landowner (landowner_id, first_name, last_name, email, phone_number) VALUES (?, ?, ?, ?, ?);''', (id, fname, lname, email, pno))
 
     def create_property(self):
@@ -47,18 +46,18 @@ class Database:
         self.conn.commit()
 
     def insert_into_property(self):
-        property_id = Prompt.ask("Enter property id: ")
-        property_type = Prompt.ask("Enter property type: ")
-        address = Prompt.ask("Enter address: ")
-        city = Prompt.ask("Enter city: ")
-        state = Prompt.ask("Enter state: ")
-        postal_code = Prompt.ask("Enter postal code: ")
-        country = Prompt.ask("Enter country: ")
-        description = Prompt.ask("Enter description: ")
-        amenities = Prompt.ask("Enter amenities: ")
-        rental_status = Prompt.ask("Enter rental status: ")
-        ownership_status = Prompt.ask("Enter ownership status: ")
-        landowner_id = Prompt.ask("Enter landowner id: ")
+        property_id = input('Enter property id: ')
+        property_type = input('Enter property type: ')
+        address = input('Enter address: ')
+        city = input('Enter city: ')
+        state = input('Enter state: ')
+        postal_code = input('Enter postal code: ')
+        country = input('Enter country: ')
+        description = input('Enter description: ')
+        amenities = input('Enter amenities: ')
+        rental_status = input('Enter rental status: ')
+        ownership_status = input('Enter ownership status: ')
+        landowner_id = input('Enter landowner id: ')
         self.cur.execute('''INSERT INTO Property (property_id, property_type, address, city, state, postal_code, country, description, amenities, rental_status, ownership_status, landowner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (property_id, property_type, address, city, state, postal_code, country, description, amenities, rental_status, ownership_status, landowner_id))
         self.conn.commit()
     
@@ -76,13 +75,13 @@ class Database:
         self.conn.commit()
 
     def insert_into_lease(self):
-        lease_id = Prompt.ask("Enter lease id: ")
-        property_id = Prompt.ask("Enter property id: ")
-        start_date = Prompt.ask("Enter start date (YYYY-MM-DD): ")
-        end_date = Prompt.ask("Enter end date (YYYY-MM-DD): ")
-        rent_amount = Prompt.ask("Enter rent amount: ")
-        payment_schedule = Prompt.ask("Enter payment schedule: ")
-        lease_terms = Prompt.ask("Enter lease terms: ")
+        lease_id = input('Enter lease id: ')
+        property_id = input('Enter property id: ')
+        start_date = input('Enter start date (YYYY-MM-DD): ')
+        end_date = input('Enter end date (YYYY-MM-DD): ')
+        rent_amount = input('Enter rent amount: ')
+        payment_schedule = input('Enter payment schedule: ')
+        lease_terms = input('Enter lease terms: ')
         self.cur.execute('''INSERT INTO Lease (lease_id, property_id, start_date, end_date, rent_amount, payment_schedule, lease_terms) VALUES (?, ?, ?, ?, ?, ?, ?);''', (lease_id, property_id, start_date, end_date, rent_amount, payment_schedule, lease_terms))
         self.conn.commit()
         
@@ -102,15 +101,15 @@ class Database:
         self.conn.commit()
 
     def insert_into_tenant(self):
-        tenant_id = Prompt.ask("Enter tenant id: ")
-        first_name = Prompt.ask("Enter first name: ")
-        last_name = Prompt.ask("Enter lastname: ")
-        email = Prompt.ask("Enter email: ")
-        phone_number = Prompt.ask("Enter phone number: ")
-        date_of_birth = Prompt.ask("Enter date of birth (YYYY-MM-DD): ")
-        move_in_date = Prompt.ask("Enter move-in date (YYYY-MM-DD): ")
-        move_out_date = Prompt.ask("Enter move-out date (YYYY-MM-DD): ")
-        lease_id = Prompt.ask("Enter lease id: ")
+        tenant_id = input('Enter tenant id: ')
+        first_name = input('Enter first name: ')
+        last_name = input('Enter last name: ')
+        email = input('Enter email: ')
+        phone_number = input('Enter phone number: ')
+        date_of_birth = input('Enter date of birth (YYYY-MM-DD): ')
+        move_in_date = input('Enter move-in date (YYYY-MM-DD): ')
+        move_out_date = input('Enter move-out date (YYYY-MM-DD): ')
+        lease_id = input('Enter lease id: ')
         self.cur.execute('''INSERT INTO Tenant (tenant_id, first_name, last_name, email, phone_number, date_of_birth, move_in_date, move_out_date, lease_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);''', (tenant_id, first_name, last_name, email, phone_number, date_of_birth, move_in_date, move_out_date, lease_id))
         self.conn.commit()
         
@@ -127,12 +126,12 @@ class Database:
         self.conn.commit()
 
     def insert_into_rent_payment(self):
-        payment_id = Prompt.ask("Enter payment id: ")
-        lease_id = Prompt.ask("Enter lease id: ")
-        payment_date = Prompt.ask("Enter payment date (YYYY-MM-DD): ")
-        amount = Prompt.ask("Enter amount: ")
-        payment_method = Prompt.ask("Enter payment method: ")
-        transaction_id = Prompt.ask("Enter transaction id: ")
+        payment_id = input('Enter payment id: ')
+        lease_id = input('Enter lease id: ')
+        payment_date = input('Enter payment date (YYYY-MM-DD): ')
+        amount = input('Enter amount: ')
+        payment_method = input('Enter payment method: ')
+        transaction_id = input('Enter transaction id: ')
         self.cur.execute('''INSERT INTO RentPayment (payment_id, lease_id, payment_date, amount, payment_method, transaction_id) VALUES (?, ?, ?, ?, ?, ?);''', (payment_id, lease_id, payment_date, amount, payment_method, transaction_id))
         self.conn.commit()
         
@@ -151,13 +150,13 @@ class Database:
         self.conn.commit()
 
     def insert_into_maintenance_request(self):
-        request_id = Prompt.ask("Enter request id: ")
-        property_id = Prompt.ask("Enter property id: ")
-        tenant_id = Prompt.ask("Enter tenant id: ")
-        request_date = Prompt.ask("Enter request date (YYYY-MM-DD): ")
-        description = Prompt.ask("Enter description: ")
-        status = Prompt.ask("Enter status: ")
-        assigned_to = Prompt.ask("Enter assigned to: ")
+        request_id = input('Enter request id: ')
+        property_id = input('Enter property id: ')
+        tenant_id = input('Enter tenant id: ')
+        request_date = input('Enter request date (YYYY-MM-DD): ')
+        description = input('Enter description: ')
+        status = input('Enter status: ')
+        assigned_to = input('Enter assigned to: ')
         self.cur.execute('''INSERT INTO MaintenanceRequest (request_id, property_id, tenant_id, request_date, description, status, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?);''', (request_id, property_id, tenant_id, request_date, description, status, assigned_to))
         self.conn.commit()
         
@@ -174,26 +173,26 @@ class Database:
         self.conn.commit()
 
     def insert_into_document(self):
-        document_id = Prompt.ask("Enter document id: ")
-        property_id = Prompt.ask("Enter property id: ")
-        document_type = Prompt.ask("Enter document type: ")
-        document_name = Prompt.ask("Enter document name: ")
-        upload_date = Prompt.ask("Enter upload date (YYYY-MM-DD): ")
-        file_path = Prompt.ask("Enter file path: ")
+        document_id = input('Enter document id: ')
+        property_id = input('Enter property id: ')
+        document_type = input('Enter document type: ')
+        document_name = input('Enter document name: ')
+        upload_date = input('Enter upload date (YYYY-MM-DD): ')
+        file_path = input('Enter file path: ')
         self.cur.execute('''INSERT INTO Document (document_id, property_id, document_type, document_name, upload_date, file_path) VALUES (?, ?, ?, ?, ?, ?);''', (document_id, property_id, document_type, document_name, upload_date, file_path))
         self.conn.commit()
 
     def calculate_rent_payment(self):
-        lease_id = Prompt.ask("Enter lease id: ")
-        start_date = Prompt.ask("Enter start date (YYYY-MM-DD): ")
-        end_date = Prompt.ask("Enter end date (YYYY-MM-DD): ")
+        lease_id = input("Enter lease id: ")
+        start_date = input("Enter start date (YYYY-MM-DD): ")
+        end_date = input("Enter end date (YYYY-MM-DD): ")
 
         self.cur.execute('''SELECT rent_amount, payment_schedule FROM Lease WHERE lease_id = ?;''', (lease_id,))
         row = self.cur.fetchone()
         if row:
             rent_amount, payment_schedule = row
             total_payment = 0
-
+            
             # Calculate the duration of the lease in months
             start_year, start_month = map(int, start_date.split('-'))
             end_year, end_month = map(int, end_date.split('-'))
@@ -206,16 +205,16 @@ class Database:
                 total_payment = (total_months // 3) * rent_amount
             elif payment_schedule == 'Annually':
                 total_payment = (total_months // 12) * rent_amount
-
+            
             return total_payment
         else:
-            console.print("Lease not found.")
+            print("Lease not found.")
             return None
-
+        
     def search_property(self):
-        property_type = Prompt.ask("Enter property type (leave blank for any): ")
-        city = Prompt.ask("Enter city (leave blank for any): ")
-        state = Prompt.ask("Enter state (leave blank for any): ")
+        property_type = input("Enter property type (leave blank for any): ")
+        city = input("Enter city (leave blank for any): ")
+        state = input("Enter state (leave blank for any): ")
 
         query = "SELECT * FROM Property WHERE 1=1"
         params = []
@@ -235,25 +234,37 @@ class Database:
         return properties
 
     def transfer_property_ownership(self):
-        property_id = Prompt.ask("Enter property ID: ")
-        new_landowner_id = Prompt.ask("Enter new landowner ID: ")
+        property_id = input("Enter property ID: ")
+        new_landowner_id = input("Enter new landowner ID: ")
 
         try:
             self.cur.execute("UPDATE Property SET landowner_id = ? WHERE property_id = ?", (new_landowner_id, property_id))
             self.conn.commit()
-            console.print("Property ownership transferred successfully.")
+            print("Property ownership transferred successfully.")
         except sqlite3.Error as e:
-            console.print(f"Error transferring property ownership: {e}")
+            print("Error transferring property ownership:", e)
 
     def display_data(self):
-        table_name = Prompt.ask("Enter table name: ")
+        table_name = input("Enter table name: ")
         self.cur.execute(f"SELECT * FROM {table_name};")
         rows = self.cur.fetchall()
         if rows:
-            console.print(f"Data from {table_name}:\n")
-            console.table(rows)
+            print(f"Data from {table_name}:")
+            for row in rows:
+                print(row)
         else:
-            console.print(f"No data found in {table_name}.")
+            print(f"No data found in {table_name}.")
+            
+    def login(self):
+        username = input("Enter username: ")
+        password = input("Enter password: ")
+
+        # Check if username and password are correct (you can implement your own authentication logic)
+        if username == "admin" and password == "admin":
+            print("Login successful!")
+            self.logged_in = True
+        else:
+            print("Invalid username or password. Please try again.")
 
     def insert(self):
         self.insert_into_landowner()
@@ -275,25 +286,28 @@ class Database:
         self.create_document()
         
     def menu(self):
+        if not self.logged_in:
+            self.login()
+            if not self.logged_in:
+                return
         while True:
-            console.print("\n=== Property Management System ===")
-            console.print("1. Creation")
-            console.print("2. Testing")
-            console.print("3. Display")
-            console.print("4. Exit")
-            choice = int(Prompt.ask("Enter choice: "))
+            print("\n=== Property Management System ===")
+            print("1. Creation")
+            print("2. Testing")
+            print("3. Display")
+            choice = int(input("Enter choice: "))
 
             if choice == 1:
-                console.print("\n=== MENU ===")
-                console.print("1. Insert Landowner")
-                console.print("2. Insert Property")
-                console.print("3. Insert Lease")
-                console.print("4. Insert Tenant")
-                console.print("5. Insert Rent Payment")
-                console.print("6. Insert Maintenance Request")
-                console.print("7. Insert Document")
-                console.print("8. Exit")
-                choice2 = int(Prompt.ask("Enter choice: "))
+                print("\n=== MENU ===")
+                print("1. Insert Landowner")
+                print("2. Insert Property")
+                print("3. Insert Lease")
+                print("4. Insert Tenant")
+                print("5. Insert Rent Payment")
+                print("6. Insert Maintenance Request")
+                print("7. Insert Document")
+                print("8. Exit")
+                choice2 = int(input("Enter choice: "))
 
                 if choice2 == 1:
                     self.create_landowner()
@@ -317,59 +331,50 @@ class Database:
                     self.create_document()
                     self.insert_into_document()
                 elif choice2 == 8:
-                    console.print("Exiting...")
+                    print("Exiting...")
                     break
                 else:
-                    console.print("Invalid choice")
+                    print("Invalid choice")
 
             elif choice == 2:
-                console.print("\n=== MENU-TESTING ===")
-                console.print("1. Calculate rent payment")
-                console.print("2. Search property")
-                console.print("3. Transfer ownership")
-                console.print("4. Exit")
-                choice3 = int(Prompt.ask("Enter choice: "))
+                print("\n=== MENU-TESTING ===")
+                print("1. Calculate rent payment")
+                print("2. Search property")
+                print("3. Transfer ownership")
+                print("4. Exit")
+                choice3 = int(input("Enter choice: "))
 
                 if choice3 == 1:
                     total_payment = self.calculate_rent_payment()
                     if total_payment is not None:
-                        console.print(f"Total rent payment: ${total_payment}")
+                        print(f"Total rent payment: ${total_payment}")
                 elif choice3 == 2:
                     properties = self.search_property()
                     if properties:
-                        console.print("Properties found:")
-                        console.table(properties)
+                        print("Properties found:")
+                        for prop in properties:
+                            print(prop)
                     else:
-                        console.print("No properties found.")
+                        print("No properties found.")
                 elif choice3 == 3:
                     self.transfer_property_ownership()
                 elif choice3 == 4:
-                    console.print("Exiting...")
+                    print("Exiting...")
                     break
                 else:
-                    console.print("Invalid choice")
+                    print("Invalid choice")
             
             elif(choice==3):
                 self.display_data()
-            elif(choice==4):
-                console.print("Exiting...")
-                break
             else:
-                console.print("Invalid choice")
+                print("Invalid choice")
 
 
+
+        
+        
 def main():
-    system = Database('PMS')
-    system.menu()
-
-
-if __name__ == "__main__":
-    main()
-
-#This program was made by Swastik Garg using the click module in Python for creating the command line interface. The code was also structured into classes and functions for better organization and maintainability. This program is designed to handle property management operations like insertion, deletion, updating, searching, and calculating rent payments. The program uses a SQLite database for storing and retrieving data.
-
-#You can use this program to insert landowners, properties, leases, tenants, maintenance requests, rent payments, and documents into the database. You can also perform tests like calculating rent payments, searching for properties, and transferring property ownership. The program also includes a display data option to show all data in a table format.
-
-#The code for this program can be found on GitHub at the following link: https://github.com/SwastikGarg/Property-Management-System.
-
-#You can use this code as a starting point and modify it according to your requirements. Remember to replace the database connection string with your own SQLite database path.
+    a=Database("PMS")
+    a.menu()
+if __name__=='__main__':
+    main()    
