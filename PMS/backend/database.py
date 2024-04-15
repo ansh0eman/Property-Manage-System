@@ -232,6 +232,15 @@ class Database:
         self.cur.execute(query, tuple(params))
         properties = self.cur.fetchall()
         return properties
+    
+    def delete_existing_property(self):
+        property_id = input("Enter property ID to delete: ")
+        try:
+            self.cur.execute("DELETE FROM Property WHERE property_id = ?", (property_id,))
+            self.conn.commit()
+            print("Property deleted successfully.")
+        except sqlite3.Error as e:
+            print("Error deleting property:", e)
 
     def transfer_property_ownership(self):
         property_id = input("Enter property ID: ")
@@ -285,7 +294,162 @@ class Database:
         self.create_maintenance_request()
         self.create_document()
         
-    def menu(self):
+    def view_existing_property(self):
+        landowner_id = input("Enter landowner ID: ")
+        self.cur.execute('''SELECT * FROM Property WHERE landowner_id = ?;''', (landowner_id,))
+        properties = self.cur.fetchall()
+        if properties:
+            print("Existing properties:")
+            for prop in properties:
+                print(prop)
+        else:
+            print("No properties found for this landowner.")
+            
+    def view_tenant_details(self):
+        landowner_id = input("Enter landowner ID: ")
+        # Retrieve properties owned by the specified landowner
+        self.cur.execute('''SELECT property_id FROM Property WHERE landowner_id = ?;''', (landowner_id,))
+        owned_properties = self.cur.fetchall()
+        
+        if owned_properties:
+            # Extract property IDs from the fetched properties
+            property_ids = [prop[0] for prop in owned_properties]
+            # Query tenants associated with the owned properties
+            self.cur.execute('''SELECT * FROM Tenant WHERE lease_id IN (SELECT lease_id FROM Lease WHERE property_id IN ({seq}))'''.format(seq=','.join(['?']*len(property_ids))), property_ids)
+            tenants = self.cur.fetchall()
+            
+            if tenants:
+                print("Tenant details for properties owned by landowner ID", landowner_id, ":")
+                for tenant in tenants:
+                    print(tenant)
+            else:
+                print("No tenants found for properties owned by landowner ID", landowner_id)
+        else:
+            print("No properties found for landowner ID", landowner_id)
+            
+    def view_documents(self):
+        landowner_id = input("Enter landowner ID: ")
+        # Retrieve properties owned by the specified landowner
+        self.cur.execute('''SELECT property_id FROM Property WHERE landowner_id = ?;''', (landowner_id,))
+        owned_properties = self.cur.fetchall()
+        
+        if owned_properties:
+            # Extract property IDs from the fetched properties
+            property_ids = [prop[0] for prop in owned_properties]
+            # Query documents associated with the owned properties
+            self.cur.execute('''SELECT * FROM Document WHERE property_id IN ({seq})'''.format(seq=','.join(['?']*len(property_ids))), property_ids)
+            documents = self.cur.fetchall()
+            
+            if documents:
+                print("Documents for properties owned by landowner ID", landowner_id, ":")
+                for doc in documents:
+                    print(doc)
+            else:
+                print("No documents found for properties owned by landowner ID", landowner_id)
+        else:
+            print("No properties found for landowner ID", landowner_id)
+            
+        
+    def calculate_rent_payment_landowner(self):
+        landowner_id = input("Enter landowner ID: ")
+        # Retrieve properties owned by the specified landowner
+        self.cur.execute('''SELECT property_id FROM Property WHERE landowner_id = ?;''', (landowner_id,))
+        owned_properties = self.cur.fetchall()
+
+        if owned_properties:
+            total_payment_landowner = 0
+            for property_id in owned_properties:
+                property_id = property_id[0]
+                # Retrieve lease information for the property
+                self.cur.execute('''SELECT lease_id, start_date, end_date, rent_amount, payment_schedule FROM Lease WHERE property_id = ?;''', (property_id,))
+                lease_info = self.cur.fetchone()
+
+                if lease_info:
+                    lease_id, start_date, end_date, rent_amount, payment_schedule = lease_info
+                    # Calculate the duration of the lease in months
+                    start_year, start_month = map(int, start_date.split('-'))
+                    end_year, end_month = map(int, end_date.split('-'))
+                    total_months = (end_year - start_year) * 12 + (end_month - start_month) + 1
+
+                    # Calculate total payment based on payment schedule
+                    if payment_schedule == 'Monthly':
+                        total_payment_landowner += total_months * rent_amount
+                    elif payment_schedule == 'Quarterly':
+                        total_payment_landowner += (total_months // 3) * rent_amount
+                    elif payment_schedule == 'Annually':
+                        total_payment_landowner += (total_months // 12) * rent_amount
+
+            print(f"Total rent payment for properties owned by landowner ID {landowner_id}: ${total_payment_landowner}")
+        else:
+            print(f"No properties found for landowner ID {landowner_id}")
+            
+    def delete_existing_property(self):
+        property_id = input("Enter property ID to delete: ")
+        try:
+            self.cur.execute("DELETE FROM Property WHERE property_id = ?", (property_id,))
+            self.conn.commit()
+            print("Property deleted successfully.")
+        except sqlite3.Error as e:
+            print("Error deleting property:", e)
+
+    def mainmenu(self):
+            print("\n=== Property Management System ===")
+            print("1. Landowner")
+            print("2. Tenant")
+            print("3. Admin")
+            choice = int(input("Enter choice: "))
+            if choice == 1:
+                self.landowner_menu()
+            elif choice == 2:
+                self.view_existing_property()
+            elif choice == 3:
+                self.admin_menu()
+                
+            
+        
+    def landowner_menu(self):
+        print("Welcome Landowner")
+        while True:
+            print("\n=== Property Management System ===")
+            print("1. Register New Property")
+            print("2. View Existing Property")
+            print("3. View Tenant Details")
+            print("4. View Documents")
+            print("5. Calculate Rent for property")
+            print("6. Handle maintenance request")
+            print("7. Delete Existing Property")
+            print("8. Exit")
+            choice = int(input("Enter choice: "))
+
+            if choice == 1:
+                self.create_property()
+                self.insert_into_property()
+            elif choice == 2:
+                self.view_existing_property()
+            elif choice == 3:
+                self.view_tenant_details()
+            elif choice == 4:
+                self.view_documents()
+            elif choice == 5:
+                self.calculate_rent_payment_landowner()
+            elif choice == 6:
+                self.handle_maintenance_request()
+            elif choice == 7:
+                self.delete_existing_property()
+            elif choice == 8:
+                print("Exiting...")
+                break
+            else:
+                print("Invalid choice")
+
+            
+            
+        
+        
+        
+        
+        
+    def admin_menu(self):
         if not self.logged_in:
             self.login()
             if not self.logged_in:
@@ -375,6 +539,6 @@ class Database:
         
 def main():
     a=Database("PMS")
-    a.menu()
+    a.mainmenu()
 if __name__=='__main__':
     main()    
