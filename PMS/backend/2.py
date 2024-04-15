@@ -1,16 +1,80 @@
 import sqlite3
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
+from rich.prompt import Prompt
+from rich.text import Text
+from rich import print
 
-console=Console()
+console = Console()
+
 class Database:
-    def __init__(self,db_file):
-        self.db_file=db_file
-        self.conn=sqlite3.connect(self.db_file)
+    def __init__(self,PMS):
+        self.PMS=PMS
+        self.conn=sqlite3.connect(self.PMS)
         self.cur=self.conn.cursor()
         self.logged_in = False
+        self.console=Console()
         
-    
+    def input_sample_data(self):
+        # Sample data
+        self.create()
+        landowner_data = [
+            (1, 'John', 'Doe', 'john.doe@example.com', '+1234567890'),
+            (2, 'Jane', 'Smith', 'jane.smith@example.com', '+1987654321')
+        ]
+
+        property_data = [
+            (1, 'House', '123 Main St', 'Springfield', 'IL', '62701', 'USA', 'Cozy 2-bedroom house', 'Furnished, parking', 'Occupied', 'Owned', 1),
+            (2, 'Apartment', '456 Elm St', 'Riverside', 'CA', '92501', 'USA', 'Modern 1-bedroom apartment', 'Gym, pool', 'Vacant', 'Owned', 2)
+        ]
+
+        lease_data = [
+            (1, 1, '2024-01-01', '2025-01-01', 1200.00, 'Monthly', 'No pets allowed. No smoking.'),
+            (2, 2, '2024-02-01', '2024-08-01', 1500.00, 'Bi-weekly', 'Pets allowed with additional fee.')
+        ]
+
+        tenant_data = [
+            (1, 'Michael', 'Johnson', 'michael.j@example.com', '+1122334455', '1990-05-15', '2024-01-01', '2025-01-01', 1),
+            (2, 'Emily', 'Brown', 'emily.b@example.com', '+1567890123', '1985-08-20', '2024-02-01', '2024-08-01', 2)
+        ]
+
+        rent_payment_data = [
+            (1, 1, '2024-01-05', 1200.00, 'Credit Card', 'CC123456789'),
+            (2, 2, '2024-02-15', 750.00, 'Bank Transfer', 'BT987654321')
+        ]
+
+        maintenance_request_data = [
+            (1, 1, 1, '2024-03-10', 'Leaky faucet in the kitchen', 'Pending', 'Plumber'),
+            (2, 2, 2, '2024-04-01', 'Broken light fixture in the living room', 'In Progress', 'Maintenance Staff')
+        ]
+
+        document_data = [
+            (1, 1, 'Lease Agreement', 'Lease_123', '2024-01-01', '/documents/lease_123.pdf'),
+            (2, 2, 'Tenant Application', 'Application_456', '2024-02-01', '/documents/application_456.pdf')
+        ]
+
+        # Inserting sample data into the Landowner table
+        self.cur.executemany('''INSERT INTO Landowner (landowner_id, first_name, last_name, email, phone_number) VALUES (?, ?, ?, ?, ?);''', landowner_data)
+
+        # Inserting sample data into the Property table
+        self.cur.executemany('''INSERT INTO Property (property_id, property_type, address, city, state, postal_code, country, description, amenities, rental_status, ownership_status, landowner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', property_data)
+
+        # Inserting sample data into the Lease table
+        self.cur.executemany('''INSERT INTO Lease (lease_id, property_id, start_date, end_date, rent_amount, payment_schedule, lease_terms) VALUES (?, ?, ?, ?, ?, ?, ?);''', lease_data)
+
+        # Inserting sample data into the Tenant table
+        self.cur.executemany('''INSERT INTO Tenant (tenant_id, first_name, last_name, email, phone_number, date_of_birth, move_in_date, move_out_date, lease_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);''', tenant_data)
+
+        # Inserting sample data into the RentPayment table
+        self.cur.executemany('''INSERT INTO RentPayment (payment_id, lease_id, payment_date, amount, payment_method, transaction_id) VALUES (?, ?, ?, ?, ?, ?);''', rent_payment_data)
+
+        # Inserting sample data into the MaintenanceRequest table
+        self.cur.executemany('''INSERT INTO MaintenanceRequest (request_id, property_id, tenant_id, request_date, description, status, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?);''', maintenance_request_data)
+
+        # Inserting sample data into the Document table
+        self.cur.executemany('''INSERT INTO Document (document_id, property_id, document_type, document_name, upload_date, file_path) VALUES (?, ?, ?, ?, ?, ?);''', document_data)
+
     def create_landowner(self):
         self.cur.execute('''CREATE TABLE if not exists Landowner  (
         landowner_id INT PRIMARY KEY,
@@ -286,7 +350,6 @@ class Database:
         self.insert_into_rent_payment()
         self.create_document()
         
-
     def create(self):
         self.create_landowner()
         self.create_property()
@@ -350,8 +413,7 @@ class Database:
                 print("No documents found for properties owned by landowner ID", landowner_id)
         else:
             print("No properties found for landowner ID", landowner_id)
-            
-        
+               
     def calculate_rent_payment_landowner(self):
         landowner_id = input("Enter landowner ID: ")
         # Retrieve properties owned by the specified landowner
@@ -395,10 +457,14 @@ class Database:
             print("Error deleting property:", e)
             
     def landowner_login(self):
-        print("=== Landowner Authentication ===")
+        console.clear()
+        console.print(Panel("=== Landowner Login ===", style="bold magenta"))
         print("1. Existing User")
         print("2. New User")
-        choice = input("Enter your choice: ")
+        print()
+        title = Text("Enter your choice: ", style="italic")
+        console.print(title, style="white")
+        choice=input("")
 
         if choice == '1':
             existing_username = input("Enter your username: ")
@@ -425,9 +491,11 @@ class Database:
             self.logged_in = True
         else:
             print("Invalid choice. Please try again.")
+        console.print("\n[bold blue]=========================================================[/bold blue]\n")
 
     def mainmenu(self):
-            print("\n=== Property Management System ===")
+            console.clear()
+            console.print(Panel("=== Property Management System ===", style="bold magenta"))
             print("1. Landowner")
             print("2. Tenant")
             print("3. Admin")
@@ -438,18 +506,18 @@ class Database:
                 self.tenant_menu()
             elif choice == 3:
                 self.admin_menu()
-                
-            
-        
+            console.print("\n[bold blue]=========================================================[/bold blue]\n")
+                    
     def landowner_menu(self):
-        print("Welcome Landowner")
+        self.console.print("Welcome Landowner",style="bold magenta")
         if not self.logged_in:
                 print("Please login first.")
                 self.landowner_login()
                 if not self.logged_in:
                     return
         while True:
-            print("\n=== Property Management System ===")
+            self.console.clear()
+            self.console.print(Panel("=== Landowner Menu ===", style="bold magenta"))
             print("1. Register New Property")
             print("2. View Existing Property")
             print("3. View Tenant Details")
@@ -459,6 +527,9 @@ class Database:
             print("7. Delete Existing Property")
             print("8. Exit")
             choice = int(input("Enter choice: "))
+            print()
+            print()
+        
 
             if choice == 1:
                 self.create_property()
@@ -475,9 +546,12 @@ class Database:
                 self.delete_existing_property()
             elif choice == 8:
                 print("Exiting...")
-                break
+                
+                return
             else:
                 print("Invalid choice")
+        
+            console.print("\n[bold blue]=========================================================[/bold blue]\n")
 
     def view_lease_details(self):
         if not self.logged_in:
@@ -554,13 +628,15 @@ class Database:
                 print(request)
         else:
             print("No maintenance requests found for tenant ID", tenant_id)
-            
-            
+         
     def tenant_login(self):
-        print("=== Tenant Authentication ===")
+        console.clear()
+        console.print(Panel("=== Tenant Login ===", style="bold magenta"))
         print("1. Existing User")
         print("2. New User")
-        choice = input("Enter your choice: ")
+        title = Text("Enter your choice: ", style="italic")
+        console.print(title, style="white")
+        choice=input("")
 
         if choice == '1':
             existing_username = input("Enter your username: ")
@@ -587,7 +663,7 @@ class Database:
             self.logged_in = True
         else:
             print("Invalid choice. Please try again.")
-
+            
     def tenant_menu(self):
         if not self.logged_in:
             print("Please login first.")
@@ -597,13 +673,17 @@ class Database:
 
         print("Welcome Tenant")
         while True:
-            print("\n=== Tenant Menu ===")
+            self.console.clear()
+            self.console.print(Panel("=== Landowner Menu ===", style="bold magenta"))
             print("1. View Lease Details")
             print("2. View Maintenance Requests")
             print("3. View rent details")
             print("4. View Documents")
-            print("5. Exit")
+            print("5. Search Property")
+            print("6. Exit")
             choice = input("Enter choice: ")
+            print()
+            print()
 
             if choice == '1':
                 self.view_lease_details()
@@ -614,23 +694,21 @@ class Database:
             elif choice == '4':
                 self.view_documents()
             elif choice == '5':
+                self.search_property()
+            elif choice == '6':
                 print("Exiting...")
                 break
             else:
-                print("Invalid choice")
-
-        
-        
-        
-        
-        
+                print("Invalid choice")       
+            
     def admin_menu(self):
         if not self.logged_in:
             self.login()
             if not self.logged_in:
                 return
         while True:
-            print("\n=== Property Management System ===")
+            self.console.clear()
+            self.console.print(Panel("=== Landowner Menu ===", style="bold magenta"))
             print("1. Creation")
             print("2. Testing")
             print("3. Display")
@@ -708,37 +786,10 @@ class Database:
             else:
                 print("Invalid choice")
 
-
-
-        
+     
 def main():
     a=Database("PMS")
-    welcome_slide = Panel.fit("[bold magenta]=== Property Management System ===[/bold magenta]\n1. Landowner\n2. Tenant\n3. Admin")
-    console.print(welcome_slide)
-
-    choice = input("Enter choice: ")
-
-    if choice == '1':
-        landowner_menu_slide = Panel.fit("[bold blue]=== Landowner Menu ===[/bold blue]\n1. Register New Property\n2. View Existing Property\n3. View Tenant Details\n4. View Documents\n5. Calculate Rent for Property\n6. Handle Maintenance Requests\n7. Delete Existing Property\n8. Exit")
-        console.print(landowner_menu_slide)
-        landowner_choice = input("Enter choice: ")
-        # Handle landowner menu options based on landowner_choice
-
-    elif choice == '2':
-        tenant_menu_slide = Panel.fit("[bold green]=== Tenant Menu ===[/bold green]\n1. View Lease Details\n2. View Maintenance Requests\n3. View Rent Details\n4. View Documents\n5. Exit")
-        console.print(tenant_menu_slide)
-        tenant_choice = input("Enter choice: ")
-        # Handle tenant menu options based on tenant_choice
-
-    elif choice == '3':
-        admin_menu_slide = Panel.fit("[bold yellow]=== Admin Menu ===[/bold yellow]\n1. Creation\n2. Testing\n3. Display")
-        console.print(admin_menu_slide)
-        admin_choice = input("Enter choice: ")
-        # Handle admin menu options based on admin_choice
-
-    else:
-        print("Invalid choice. Please try again.")
-        
-
+    a.input_sample_data()
+    a.mainmenu()
 if __name__=='__main__':
-    main()
+    main()    
