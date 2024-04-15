@@ -391,6 +391,38 @@ class Database:
             print("Property deleted successfully.")
         except sqlite3.Error as e:
             print("Error deleting property:", e)
+            
+    def landowner_login(self):
+        print("=== Landowner Authentication ===")
+        print("1. Existing User")
+        print("2. New User")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            existing_username = input("Enter your username: ")
+            existing_password = input("Enter your password: ")
+            # Check if the username and password exist in the database
+            # Implement your authentication logic here
+
+            # For demonstration purposes, let's assume a simple hardcoded check
+            if existing_username == "existing_user" and existing_password == "password":
+                print("Login successful!")
+                self.logged_in = True
+            else:
+                print("Invalid username or password. Please try again.")
+        elif choice == '2':
+            self.create_landowner()
+            self.insert_into_landowner()
+            new_username = input("Enter a new username: ")
+            new_password = input("Enter a new password: ")
+            # Store the new username and password in the database
+            # Implement your user creation logic here
+
+            # For demonstration purposes, let's assume we successfully create a new user
+            print("New user created successfully!")
+            self.logged_in = True
+        else:
+            print("Invalid choice. Please try again.")
 
     def mainmenu(self):
             print("\n=== Property Management System ===")
@@ -401,7 +433,7 @@ class Database:
             if choice == 1:
                 self.landowner_menu()
             elif choice == 2:
-                self.view_existing_property()
+                self.tenant_menu()
             elif choice == 3:
                 self.admin_menu()
                 
@@ -409,6 +441,11 @@ class Database:
         
     def landowner_menu(self):
         print("Welcome Landowner")
+        if not self.logged_in:
+                print("Please login first.")
+                self.landowner_login()
+                if not self.logged_in:
+                    return
         while True:
             print("\n=== Property Management System ===")
             print("1. Register New Property")
@@ -432,8 +469,6 @@ class Database:
                 self.view_documents()
             elif choice == 5:
                 self.calculate_rent_payment_landowner()
-            elif choice == 6:
-                self.handle_maintenance_request()
             elif choice == 7:
                 self.delete_existing_property()
             elif choice == 8:
@@ -442,8 +477,146 @@ class Database:
             else:
                 print("Invalid choice")
 
+    def view_lease_details(self):
+        if not self.logged_in:
+            print("Please login first.")
+            self.tenant_login()
+            if not self.logged_in:
+                return
+
+        tenant_id = input("Enter tenant ID: ")
+        # Retrieve leases associated with the specified tenant
+        self.cur.execute('''SELECT lease_id FROM Tenant WHERE tenant_id = ?;''', (tenant_id,))
+        leases = self.cur.fetchall()
+
+        if leases:
+            # Extract lease IDs from the fetched leases
+            lease_ids = [lease[0] for lease in leases]
+            # Query lease details for the tenant's leases
+            self.cur.execute('''SELECT * FROM Lease WHERE lease_id IN ({seq})'''.format(seq=','.join(['?']*len(lease_ids))), lease_ids)
+            lease_details = self.cur.fetchall()
+
+            if lease_details:
+                print("Lease details for tenant ID", tenant_id, ":")
+                for lease in lease_details:
+                    print(lease)
+            else:
+                print("No lease details found for tenant ID", tenant_id)
+        else:
+            print("No leases found for tenant ID", tenant_id)        
+        def tenant_login(self):
+            print("=== Tenant Authentication ===")
+            print("1. Existing User")
+            print("2. New User")
+            choice = input("Enter your choice: ")
+
+            if choice == '1':
+                existing_username = input("Enter your username: ")
+                existing_password = input("Enter your password: ")
+                # Check if the username and password exist in the database
+                # Implement your authentication logic here
+
+                # For demonstration purposes, let's assume a simple hardcoded check
+                if existing_username == "existing_user" and existing_password == "password":
+                    print("Login successful!")
+                    self.logged_in = True
+                else:
+                    print("Invalid username or password. Please try again.")
+            elif choice == '2':
+                new_username = input("Enter a new username: ")
+                new_password = input("Enter a new password: ")
+                # Store the new username and password in the database
+                # Implement your user creation logic here
+
+                # For demonstration purposes, let's assume we successfully create a new user
+                print("New user created successfully!")
+                self.logged_in = True
+            else:
+                print("Invalid choice. Please try again.")
+            
+    def view_maintenance_requests(self):
+        if not self.logged_in:
+            print("Please login first.")
+            self.tenant_login()
+            if not self.logged_in:
+                return
+
+        tenant_id = input("Enter tenant ID: ")
+        # Retrieve maintenance requests associated with the specified tenant
+        self.cur.execute('''SELECT * FROM MaintenanceRequest WHERE tenant_id = ?;''', (tenant_id,))
+        maintenance_requests = self.cur.fetchall()
+
+        if maintenance_requests:
+            print("Maintenance requests for tenant ID", tenant_id, ":")
+            for request in maintenance_requests:
+                print(request)
+        else:
+            print("No maintenance requests found for tenant ID", tenant_id)
             
             
+    def tenant_login(self):
+        print("=== Tenant Authentication ===")
+        print("1. Existing User")
+        print("2. New User")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            existing_username = input("Enter your username: ")
+            existing_password = input("Enter your password: ")
+            # Check if the username and password exist in the database
+            # Implement your authentication logic here
+
+            # For demonstration purposes, let's assume a simple hardcoded check
+            if existing_username == "existing_user" and existing_password == "password":
+                print("Login successful!")
+                self.logged_in = True
+            else:
+                print("Invalid username or password. Please try again.")
+        elif choice == '2':
+            self.create_tenant()
+            self.insert_into_tenant()
+            new_username = input("Enter a new username: ")
+            new_password = input("Enter a new password: ")
+            # Store the new username and password in the database
+            # Implement your user creation logic here
+
+            # For demonstration purposes, let's assume we successfully create a new user
+            print("New user created successfully!")
+            self.logged_in = True
+        else:
+            print("Invalid choice. Please try again.")
+
+    def tenant_menu(self):
+        if not self.logged_in:
+            print("Please login first.")
+            self.tenant_login()
+            if not self.logged_in:
+                return
+
+        print("Welcome Tenant")
+        while True:
+            print("\n=== Tenant Menu ===")
+            print("1. View Lease Details")
+            print("2. View Maintenance Requests")
+            print("3. View rent details")
+            print("4. View Documents")
+            print("5. Exit")
+            choice = input("Enter choice: ")
+
+            if choice == '1':
+                self.view_lease_details()
+            elif choice == '2':
+                self.view_maintenance_requests()
+            elif choice == '3':
+                self.calculate_rent_payment()
+            elif choice == '4':
+                self.view_documents()
+            elif choice == '5':
+                print("Exiting...")
+                break
+            else:
+                print("Invalid choice")
+
         
         
         
