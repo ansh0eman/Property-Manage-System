@@ -123,7 +123,7 @@ class Database:
         amenities = input('Enter amenities: ')
         rental_status = input('Enter rental status: ')
         ownership_status = input('Enter ownership status: ')
-        landowner_id = input('Enter landowner id: ')
+        landowner_id = int(input('Enter landowner id: '))
         self.cur.execute('''INSERT INTO Property (property_id, property_type, address, city, state, postal_code, country, description, amenities, rental_status, ownership_status, landowner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (property_id, property_type, address, city, state, postal_code, country, description, amenities, rental_status, ownership_status, landowner_id))
         self.conn.commit()
     
